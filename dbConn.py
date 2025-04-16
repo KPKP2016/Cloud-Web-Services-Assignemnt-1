@@ -8,6 +8,9 @@ db_config = {
     'db': 'AdventureWorks2019',
 }
   
-# Create a connection to the database
-conn = MySQLdb.connect(**db_config)              
- 
+
+try:
+    conn = MySQLdb.connect(**db_config)
+    print("Database connection successful")
+except MySQLdb.Error as e:
+    print(f"Error connecting to database: {e}")
