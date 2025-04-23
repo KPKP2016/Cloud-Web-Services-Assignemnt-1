@@ -1,5 +1,4 @@
 import jwt
-import os
 from fastapi import HTTPException, Security
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from passlib.context import CryptContext
@@ -9,9 +8,7 @@ from datetime import datetime, timedelta
 class AuthHandler():
     security = HTTPBearer()
     pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-    # Using a more secure approach for the secret key
-    # In production, this would be stored as an environment variable
-    secret = 'ADVENTURE_WORKS_API_SECRET_KEY'
+    secret = 'SECRET'
 
     def get_password_hash(self, password):
         return self.pwd_context.hash(password)
@@ -21,7 +18,7 @@ class AuthHandler():
 
     def encode_token(self, user_id):
         payload = {
-            'exp': datetime.utcnow() + timedelta(days=0, hours=1),  # Extended token validity to 1 hour
+            'exp': datetime.utcnow() + timedelta(days=0, minutes=5),
             'iat': datetime.utcnow(),
             'sub': user_id
         }
@@ -36,9 +33,9 @@ class AuthHandler():
             payload = jwt.decode(token, self.secret, algorithms=['HS256'])
             return payload['sub']
         except jwt.ExpiredSignatureError:
-            raise HTTPException(status_code=401, detail='Token has expired')
+            raise HTTPException(status_code=401, detail='Signature has expired')
         except jwt.InvalidTokenError as e:
             raise HTTPException(status_code=401, detail='Invalid token')
 
     def auth_wrapper(self, auth: HTTPAuthorizationCredentials = Security(security)):
-        return self.decode_token(auth.credentials)
+        return self.decode_token(auth.credentials)    
